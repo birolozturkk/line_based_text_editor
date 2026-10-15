@@ -55,6 +55,8 @@ void save_document(char *file_name);
 
 void init();
 
+bool debug = true;
+
 LineNode *line_root, *cursor_line_p;
 CharNode *cursor_ch_p;
 
@@ -62,12 +64,25 @@ void move(int r, int c) {
     LineNode *line_iter = line_root;
     for (int i = 0; i < r - 1; i++) {
         if (line_iter -> next == NULL) {
-            printf("(%d, %d) konumu gecersiz", r, c);
+            printf("(%d, %d) gecersiz konum", r, c);
             return;
         }
         line_iter = line_iter -> next;
     }
+
+    CharNode *ch_iter = line_iter -> ch_root;
+    for (int i = 0; i < c; i++) {
+        if (ch_iter -> next == NULL) {
+            printf("(%d, %d) gecersiz konum", r, c);
+            return;
+        }
+        ch_iter = ch_iter -> next;
+    }
     cursor_line_p = line_iter;
+    cursor_ch_p = ch_iter;
+
+    if (debug)
+        printf("Cursor char value: %c", cursor_ch_p -> ch_value);
 }
 
 void load_document(char *file_name) {
@@ -152,5 +167,6 @@ int main(void) {
     init();
     load_document("input.txt");
     save_document("output.txt");
+    move(1, 12);
     return 0;
 }
