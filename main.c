@@ -87,8 +87,17 @@ void move(int r, int c) {
 
 void insert(char *text) {
     char ch;
-    while ((ch = *text) != '\n') {
-        CharNode *temp = (CharNode*) malloc(sizeof(CharNode*));
+
+    if (cursor_ch_p == NULL) {
+        cursor_ch_p = (CharNode*) malloc(sizeof(CharNode));
+        cursor_ch_p -> ch_value = *text++;
+        cursor_ch_p -> next = NULL;
+        cursor_ch_p -> prev = NULL;
+        cursor_line_p -> ch_root = cursor_ch_p;
+    }
+
+    while ((ch = *text++) != '\n') {
+        CharNode *temp = (CharNode*) malloc(sizeof(CharNode));
         temp -> ch_value = ch;
         temp -> next = NULL;
         temp -> prev = cursor_ch_p;
