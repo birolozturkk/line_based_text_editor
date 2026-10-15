@@ -70,8 +70,8 @@ void move(int r, int c) {
         line_iter = line_iter -> next;
     }
 
-    CharNode *ch_iter = line_iter -> ch_root;
-    for (int i = 0; i < c; i++) {
+    CharNode *ch_iter = c > 0 ? line_iter -> ch_root : NULL;
+    for (int i = 0; i < c - 1; i++) {
         if (ch_iter -> next == NULL) {
             printf("(%d, %d) gecersiz konum", r, c);
             return;
@@ -83,6 +83,20 @@ void move(int r, int c) {
 
     if (debug)
         printf("Cursor char value: %c", cursor_ch_p -> ch_value);
+}
+
+void insert(char *text) {
+    char ch;
+    while ((ch = *text) != '\n') {
+        CharNode *temp = (CharNode*) malloc(sizeof(CharNode*));
+        temp -> ch_value = ch;
+        temp -> next = NULL;
+        temp -> prev = cursor_ch_p;
+        cursor_ch_p -> next = temp;
+
+        cursor_ch_p = temp;
+        text++;
+    }
 }
 
 void load_document(char *file_name) {
