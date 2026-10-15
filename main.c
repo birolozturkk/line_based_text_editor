@@ -104,7 +104,23 @@ void insert(char *text) {
         cursor_ch_p -> next = temp;
 
         cursor_ch_p = temp;
-        text++;
+    }
+}
+
+void del(int n) {
+
+    CharNode *ch_iter = cursor_ch_p == NULL ? cursor_line_p -> ch_root : cursor_ch_p -> next;
+    LineNode *line_iter = cursor_line_p;
+    for (int i = 0; i < n - 1; i++) {
+        if (ch_iter == NULL) {
+            if (line_iter -> next == NULL) return;
+            line_iter = line_iter -> next;
+            ch_iter = line_iter -> ch_root;
+        }
+
+        CharNode *temp = ch_iter;
+        ch_iter = ch_iter -> next;
+        free(temp);
     }
 }
 
