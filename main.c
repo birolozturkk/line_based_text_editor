@@ -89,7 +89,7 @@ void insert(char *text) {
     if (cursor_ch_p == NULL) {
         cursor_ch_p = (CharNode*) malloc(sizeof(CharNode));
         cursor_ch_p -> ch_value = *text++;
-        cursor_ch_p -> next = NULL;
+        cursor_ch_p -> next = cursor_line_p -> ch_root;
         cursor_ch_p -> prev = NULL;
         cursor_line_p -> ch_root = cursor_ch_p;
     }
