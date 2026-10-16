@@ -122,6 +122,47 @@ void del(int n) {
         ch_iter = ch_iter -> next;
         free(temp);
     }
+
+    if (cursor_ch_p == NULL) {
+        cursor_line_p -> ch_root = ch_iter;
+        ch_iter -> prev = cursor_line_p -> ch_root;
+    } else {
+        cursor_ch_p -> next = ch_iter;
+        ch_iter -> prev = cursor_ch_p;
+    }
+}
+
+void backspace(int n) {
+    CharNode *temp_end = cursor_ch_p -> next;
+    for (int i = 0; i < n; i++) {
+        if (cursor_ch_p == NULL) {
+            if (cursor_line_p -> prev == NULL) return;
+            LineNode *temp_line = cursor_line_p;
+            cursor_line_p = cursor_line_p -> prev;
+            cursor_line_p -> next = temp_line -> next;
+            temp_line -> next -> prev = cursor_line_p;
+            free(temp_line);
+
+            CharNode *ch_iter = cursor_line_p -> ch_root;
+            while (ch_iter -> next != NULL)
+                ch_iter = ch_iter -> next;
+
+            cursor_ch_p = ch_iter;
+            continue;
+        }
+
+        CharNode *temp_ch = cursor_ch_p;
+        cursor_ch_p = cursor_ch_p -> prev;
+        free(temp_ch);
+    }
+
+    if (cursor_ch_p == NULL) {
+        cursor_line_p -> ch_root = temp_end;
+        temp_end -> prev = cursor_line_p -> ch_root;
+    } else {
+        cursor_ch_p -> next = temp_end;
+        temp_end -> prev = cursor_ch_p;
+    }
 }
 
 void load_document(char *file_name) {
