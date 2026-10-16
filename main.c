@@ -251,6 +251,12 @@ int main(void) {
     init();
     load_document("input.txt");
     save_document("output.txt");
-    move(1, 12);
+    move(2, 4);
+    insert("A\n");
+    move(2, 4);
+    backspace(3);
+   // del(2);
+    save_document("output.txt");
+
     return 0;
 }
