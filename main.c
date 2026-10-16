@@ -110,7 +110,7 @@ void del(int n) {
 
     CharNode *ch_iter = cursor_ch_p == NULL ? cursor_line_p -> ch_root : cursor_ch_p -> next;
     LineNode *line_iter = cursor_line_p;
-    for (int i = 0; i < n - 1; i++) {
+    for (int i = 0; i < n; i++) {
         if (ch_iter == NULL) {
             if (line_iter -> next == NULL) return;
             LineNode *line_temp = line_iter -> next;
