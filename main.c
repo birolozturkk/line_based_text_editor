@@ -1,13 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-
 struct line {
-    int n;
     struct ch *ch_root;
-    struct l *next;
-    struct l *prev;
+    struct line *next;
+    struct line *prev;
 } typedef LineNode;
 
 struct ch {
@@ -15,18 +12,6 @@ struct ch {
     struct ch *next;
     struct ch *prev;
 } typedef CharNode;
-
-// Doubly LinkedList Functions
-// void add_line_node(LineNode *root, int n) {
-//     while (root -> next != NULL)
-//         root = root -> next;
-//
-//     LineNode *temp = (LineNode*) malloc(sizeof(LineNode));
-//     temp -> n = n;
-//     temp -> next = NULL;
-//     temp -> prev = root;
-//     root -> next = temp;
-// }
 
 // Cursor Commands
 void move(int r, int c);
@@ -82,7 +67,8 @@ void move(int r, int c) {
     cursor_ch_p = ch_iter;
 
     if (debug)
-        printf("Cursor char value: %c", cursor_ch_p -> ch_value);
+        if (cursor_ch_p != NULL)
+            printf("Cursor char value: %c", cursor_ch_p -> ch_value);
 }
 
 void insert(char *text) {
@@ -107,7 +93,6 @@ void insert(char *text) {
 }
 
 void del(int n) {
-
     CharNode *ch_iter = cursor_ch_p == NULL ? cursor_line_p -> ch_root : cursor_ch_p -> next;
     LineNode *line_iter = cursor_line_p;
     for (int i = 0; i < n; i++) {
@@ -183,7 +168,6 @@ void load_document(char *file_name) {
     while ((ch = fgetc(file)) != EOF) {
         if (ch == '\n') {
             LineNode *temp = (LineNode*) malloc(sizeof(LineNode));
-            temp -> n = line_iter -> n + 1;
             temp -> ch_root = NULL;
             temp -> next = NULL;
             temp -> prev = line_iter;
@@ -238,7 +222,6 @@ void save_document(char *file_name) {
 
 void init() {
     line_root = (LineNode*) malloc(sizeof(LineNode));
-    line_root -> n = 1;
     line_root -> ch_root = NULL;
     line_root -> next = NULL;
     line_root -> prev = NULL;
