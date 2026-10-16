@@ -86,8 +86,6 @@ void move(int r, int c) {
 }
 
 void insert(char *text) {
-    char ch;
-
     if (cursor_ch_p == NULL) {
         cursor_ch_p = (CharNode*) malloc(sizeof(CharNode));
         cursor_ch_p -> ch_value = *text++;
