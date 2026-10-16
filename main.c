@@ -201,6 +201,7 @@ void delline(int r) {
         free(temp_ch);
     }
     if (line_iter -> prev == NULL) {
+        if (line_iter -> next == NULL) return;
         cursor_line_p = line_iter -> next;
         cursor_line_p -> prev = NULL;
         line_root = cursor_line_p;
@@ -215,6 +216,54 @@ void delline(int r) {
 void test_delline() {
     delline(2);
     delline(1);
+    save_document("output.txt");
+}
+
+void replace(char *searched, char *replaced) {
+    LineNode *line_iter = line_root;
+    while (line_iter != NULL) {
+        CharNode *ch_iter = line_iter -> ch_root;
+        CharNode *begin = NULL;
+        int index = 0;
+        while (ch_iter != NULL) {
+            if (*(searched + index) == '\n' && begin != NULL) {
+                CharNode *rm_iter = begin;
+                begin = begin -> prev;
+                while (rm_iter != ch_iter) {
+                        CharNode *temp_ch = rm_iter;
+                        rm_iter = rm_iter -> next;
+                        free(temp_ch);
+                }
+                int i = 0;
+                char ch;
+                while ((ch = *(replaced + i++)) != '\n') {
+                    CharNode *temp_ch = (CharNode*) malloc(sizeof(CharNode));
+                    temp_ch -> ch_value = ch;
+                    temp_ch -> next = NULL;
+                    temp_ch -> prev = begin;
+                    begin -> next = temp_ch;
+
+                    begin = temp_ch;
+                }
+                begin -> next = ch_iter;
+                index = 0;
+                begin = NULL;
+            }
+            if (ch_iter -> ch_value != *(searched + index)) {
+                begin = NULL;
+                index = 0;
+            }
+            else if (index++ == 0)
+                begin = ch_iter;
+
+            ch_iter = ch_iter -> next;
+        }
+        line_iter = line_iter -> next;
+    }
+}
+
+void test_replace() {
+    replace("Huseyin\n", "Birol\n");
     save_document("output.txt");
 }
 
@@ -298,7 +347,7 @@ int main(void) {
     init();
     load_document("input.txt");
     save_document("output.txt");
-    test_delline();
+    test_replace();
 
     return 0;
 }
