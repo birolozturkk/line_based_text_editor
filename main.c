@@ -98,7 +98,7 @@ void insert(char *text) {
     while ((ch = *text++) != '\n') {
         CharNode *temp = (CharNode*) malloc(sizeof(CharNode));
         temp -> ch_value = ch;
-        temp -> next = NULL;
+        temp -> next = cursor_ch_p -> next;
         temp -> prev = cursor_ch_p;
         cursor_ch_p -> next = temp;
 
@@ -113,8 +113,13 @@ void del(int n) {
     for (int i = 0; i < n - 1; i++) {
         if (ch_iter == NULL) {
             if (line_iter -> next == NULL) return;
-            line_iter = line_iter -> next;
-            ch_iter = line_iter -> ch_root;
+            LineNode *line_temp = line_iter -> next;
+            line_iter -> next = line_temp -> next;
+            line_temp -> next -> prev = line_iter;
+
+            ch_iter = line_temp -> ch_root;
+            free(line_temp);
+            continue;
         }
 
         CharNode *temp = ch_iter;
