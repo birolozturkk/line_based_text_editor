@@ -71,6 +71,49 @@ void move(int r, int c) {
             printf("Cursor char value: %c", cursor_ch_p -> ch_value);
 }
 
+void left(int n) {
+    for (int i = 0; i < n; i++) {
+        if (cursor_ch_p == NULL) {
+            if (cursor_line_p -> prev == NULL) return;
+            cursor_line_p = cursor_line_p -> prev;
+            CharNode *ch_iter = cursor_line_p -> ch_root;
+            while (ch_iter != NULL && ch_iter -> next != NULL)
+                ch_iter = ch_iter -> next;
+            cursor_ch_p = ch_iter;
+            continue;
+        }
+        cursor_ch_p = cursor_ch_p -> prev;
+    }
+}
+
+void right(int n) {
+    for (int i = 0; i < n; i++) {
+        if (cursor_ch_p != NULL && cursor_ch_p -> next == NULL) {
+            if (cursor_line_p -> next == NULL) return;
+            cursor_line_p = cursor_line_p -> next;
+            cursor_ch_p = NULL;
+            continue;
+        }
+        cursor_ch_p = cursor_ch_p == NULL ? cursor_line_p -> ch_root : cursor_ch_p -> next;
+    }
+}
+
+void up(int n) {
+    for (int i = 0; i < n; i++) {
+        if (cursor_line_p -> prev == NULL) return;
+        cursor_line_p = cursor_line_p -> prev;
+    }
+    cursor_ch_p = NULL;
+}
+
+void down(int n) {
+    for (int i = 0; i < n; i++) {
+        if (cursor_line_p -> next == NULL) return;
+        cursor_line_p = cursor_line_p -> next;
+    }
+    cursor_ch_p = NULL;
+}
+
 void insert(char *text) {
     if (cursor_ch_p == NULL) {
         cursor_ch_p = (CharNode*) malloc(sizeof(CharNode));
