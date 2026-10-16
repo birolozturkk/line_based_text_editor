@@ -94,6 +94,7 @@ void insert(char *text) {
         cursor_line_p -> ch_root = cursor_ch_p;
     }
 
+    char ch;
     while ((ch = *text++) != '\n') {
         CharNode *temp = (CharNode*) malloc(sizeof(CharNode));
         temp -> ch_value = ch;
