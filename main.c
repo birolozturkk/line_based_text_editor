@@ -158,7 +158,8 @@ void newline() {
     LineNode *temp_line = (LineNode*) malloc(sizeof(LineNode));
     temp_line -> next = cursor_line_p -> next;
     temp_line -> prev = cursor_line_p;
-    temp_line -> next -> prev = temp_line;
+    if (temp_line -> next != NULL)
+        temp_line -> next -> prev = temp_line;
 
     cursor_line_p -> next = temp_line;
     temp_line -> ch_root = cursor_ch_p == NULL ? cursor_line_p -> ch_root : cursor_ch_p -> next;
@@ -172,6 +173,7 @@ void newline() {
     cursor_line_p = temp_line;
     cursor_ch_p = NULL;
 }
+
 void test_newline() {
     move(2, 0);
     newline();
@@ -179,6 +181,40 @@ void test_newline() {
     newline();
     move(1, 5);
     newline();
+    save_document("output.txt");
+}
+
+void delline(int r) {
+    LineNode *line_iter = line_root;
+    for (int i = 0; i < r - 1; i++) {
+        if (line_iter -> next == NULL) {
+            printf("%d numarali satir bulunamadi", r);
+            return;
+        }
+        line_iter = line_iter -> next;
+    }
+
+    CharNode *ch_iter = line_iter -> ch_root;
+    while (ch_iter != NULL) {
+        CharNode *temp_ch = ch_iter;
+        ch_iter = ch_iter -> next;
+        free(temp_ch);
+    }
+    if (line_iter -> prev == NULL) {
+        cursor_line_p = line_iter -> next;
+        cursor_line_p -> prev = NULL;
+        line_root = cursor_line_p;
+    } else
+        line_iter -> prev -> next = line_iter -> next;
+
+    if (line_iter -> next != NULL)
+        line_iter -> next -> prev = line_iter -> prev;
+    free(line_iter);
+}
+
+void test_delline() {
+    delline(2);
+    delline(1);
     save_document("output.txt");
 }
 
@@ -262,7 +298,7 @@ int main(void) {
     init();
     load_document("input.txt");
     save_document("output.txt");
-    test_newline();
+    test_delline();
 
     return 0;
 }
