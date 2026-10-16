@@ -154,6 +154,34 @@ void backspace(int n) {
     }
 }
 
+void newline() {
+    LineNode *temp_line = (LineNode*) malloc(sizeof(LineNode));
+    temp_line -> next = cursor_line_p -> next;
+    temp_line -> prev = cursor_line_p;
+    temp_line -> next -> prev = temp_line;
+
+    cursor_line_p -> next = temp_line;
+    temp_line -> ch_root = cursor_ch_p == NULL ? cursor_line_p -> ch_root : cursor_ch_p -> next;
+    if (temp_line -> ch_root != NULL)
+        temp_line -> ch_root -> prev = NULL;
+    if (cursor_ch_p == NULL)
+        cursor_line_p -> ch_root = NULL;
+    else
+        cursor_ch_p -> next = NULL;
+
+    cursor_line_p = temp_line;
+    cursor_ch_p = NULL;
+}
+void test_newline() {
+    move(2, 0);
+    newline();
+    move(1, 13);
+    newline();
+    move(1, 5);
+    newline();
+    save_document("output.txt");
+}
+
 void load_document(char *file_name) {
     FILE *file = fopen(file_name, "r");
 
@@ -234,12 +262,7 @@ int main(void) {
     init();
     load_document("input.txt");
     save_document("output.txt");
-    move(2, 4);
-    insert("A\n");
-    move(2, 4);
-    backspace(3);
-   // del(2);
-    save_document("output.txt");
+    test_newline();
 
     return 0;
 }
