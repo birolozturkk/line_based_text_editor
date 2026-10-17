@@ -34,7 +34,7 @@ void backspace(int n);
 
 void newline();
 
-void delline(int r);
+int delline(int r);
 
 void replace(char *searched, char *replaced);
 
@@ -54,6 +54,9 @@ int str_to_uint(char *str);
 void load_document(char *file_name);
 
 void save_document(char *file_name);
+
+void run_as_cmd_file(char *command_file);
+void run_command(char *command, int cmd_row);
 
 void init();
 
@@ -80,12 +83,6 @@ void move(int r, int c) {
     }
     cursor_line_p = line_iter;
     cursor_ch_p = ch_iter;
-}
-void test_move() {
-    move(1, 12);
-    printf("\n%c", cursor_ch_p -> ch_value); //r
-    move(3, 12);
-    printf("\n%c", cursor_ch_p -> ch_value); //k
 }
 
 void left(int n) {
@@ -240,22 +237,11 @@ void newline() {
     cursor_ch_p = NULL;
 }
 
-void test_newline() {
-    move(2, 0);
-    newline();
-    move(1, 13);
-    newline();
-    move(1, 5);
-    newline();
-    save_document("output.txt");
-}
-
-void delline(int r) {
+int delline(int r) {
     LineNode *line_iter = line_root;
     for (int i = 0; i < r - 1; i++) {
         if (line_iter->next == NULL) {
-            printf("\n%d numarali satir bulunamadi", r);
-            return;
+            return -1;
         }
         line_iter = line_iter->next;
     }
@@ -267,7 +253,7 @@ void delline(int r) {
         free(temp_ch);
     }
     if (line_iter->prev == NULL) {
-        if (line_iter->next == NULL) return;
+        if (line_iter->next == NULL) return 0;
         cursor_line_p = line_iter->next;
         cursor_line_p->prev = NULL;
         line_root = cursor_line_p;
@@ -277,15 +263,11 @@ void delline(int r) {
     if (line_iter->next != NULL)
         line_iter->next->prev = line_iter->prev;
     free(line_iter);
-}
-
-void test_delline() {
-    delline(2);
-    delline(1);
-    save_document("output.txt");
+    return 0;
 }
 
 void replace(char *searched, char *replaced) {
+    int counter = 0;
     LineNode *line_iter = line_root;
     while (line_iter != NULL) {
         CharNode *ch_iter = line_iter -> ch_root;
@@ -298,6 +280,7 @@ void replace(char *searched, char *replaced) {
                 ch_iter = ch_iter -> next;
 
                 if (*(searched + ind) == '\0' && ch_begin != NULL) {
+                    counter++;
                     CharNode *rm_iter = ch_begin;
                     ch_begin = ch_begin -> prev;
                     while (rm_iter != ch_iter) {
@@ -332,11 +315,7 @@ void replace(char *searched, char *replaced) {
         }
         line_iter = line_iter -> next;
     }
-}
-
-void test_replace() {
-    replace("Huseyin\n", "Birol\n");
-    save_document("output.txt");
+    printf("\nREPLACED %d", counter);
 }
 
 void print() {
@@ -397,6 +376,7 @@ void cursor() {
 }
 
 void find(char *searched) {
+    printf("\nFOUND");
     int r = 1;
     LineNode *line_iter = line_root;
     while (line_iter != NULL) {
@@ -410,7 +390,7 @@ void find(char *searched) {
                 c++;
 
                 if (*(searched + ind) == '\0') {
-                    printf("\n%d:%d", r, c_begin);
+                    printf(" %d:%d", r, c_begin);
                 }
             }
             else if (ind == 0) {
@@ -443,7 +423,7 @@ void load_document(char *file_name) {
     FILE *file = fopen(file_name, "r");
 
     if (file == NULL) {
-        printf("Dosya okunamadi");
+        printf("\nDosya okunamadi");
         return;
     }
 
@@ -505,7 +485,7 @@ void save_document(char *file_name) {
     fclose(file);
 }
 
-void run_commands(char *command_file) {
+void run_as_cmd_file(char *command_file) {
     FILE *file = fopen(command_file, "r");
     if (file == NULL) {
         printf("\nKomut dosyasi okunamadi");
@@ -515,139 +495,149 @@ void run_commands(char *command_file) {
     int cmd_row = 1;
     char command_line[30];
     while (fgets(command_line, sizeof(command_line), file) != NULL) {
-        char *command = strtok(command_line, " \n");
-        if (command == NULL || command[0] == '\n') continue;
-
-        if (strcmp(command, "MOVE") == 0) {
-            char *arg1 = strtok(NULL, " \n");
-            char *arg2 = strtok(NULL, " \n");
-
-            if (arg1 == NULL || arg2 == NULL) {
-                printf("\nERROR %d: Eksik bagimsiz degisken", cmd_row);
-                continue;
-            }
-
-            int r = str_to_uint(arg1);
-            int c = str_to_uint(arg2);
-
-            if (r < 0 || c < 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-            move(r, c);
-        }
-        else if (strcmp(command, "LEFT") == 0) {
-            char *arg1 = strtok(NULL, " \n");
-
-            int n = str_to_uint(arg1);
-            if (n <= 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-            left(n);
-        }
-        else if (strcmp(command, "RIGHT") == 0) {
-            char *arg1 = strtok(NULL, " \n");
-            int n = str_to_uint(arg1);
-            if (n <= 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-            right(n);
-        }
-        else if (strcmp(command, "UP") == 0) {
-            char *arg1 = strtok(NULL, " \n");
-            int n = str_to_uint(arg1);
-            if (n <= 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-            up(n);
-        }
-        else if (strcmp(command, "DOWN") == 0) {
-            char *arg1 = strtok(NULL, " \n");
-            int n = str_to_uint(arg1);
-            if (n <= 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-            down(n);
-        }
-        else if (strcmp(command, "INSERT") == 0) {
-            char *arg1 = strtok(NULL, "\"\n");
-            insert(arg1);
-        }
-        else if (strcmp(command, "DELETE") == 0) {
-            char *arg1 = strtok(NULL, " \n");
-            int n = str_to_uint(arg1);
-            if (n <= 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-            del(n);
-        }
-        else if (strcmp(command, "BACKSPACE") == 0) {
-            char *arg1 = strtok(NULL, " \n");
-            int n = str_to_uint(arg1);
-            if (n <= 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-            backspace(n);
-        }
-        else if (strcmp(command, "NEWLINE") == 0)
-            newline();
-        else if (strcmp(command, "DELLINE") == 0) {
-            char *arg1 = strtok(NULL, " \n");
-            int r = str_to_uint(arg1);
-            if (r < 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-            delline(r);
-        }
-        else if (strcmp(command, "REPLACE") == 0) {
-            char *arg1 = strtok(NULL, " \"\n");
-            char *arg2 = strtok(NULL, " \"\n");
-            replace(arg1, arg2);
-        }
-        else if (strcmp(command, "PRINT") == 0) {
-            char *arg1 = strtok(NULL, " []\n");
-            char *arg2 = strtok(NULL, " []\n");
-            if (arg1 == NULL) {
-                print();
-                continue;
-            }
-            int a = str_to_uint(arg1);
-            int b = str_to_uint(arg2);
-
-            if (a < 0 || b < 0) {
-                printf("\nERROR %d: Gecersiz sayi", cmd_row);
-                continue;
-            }
-
-            int rows = 0;
-            LineNode *line_iter = line_root;
-            while (line_iter != NULL) {
-                rows++;
-                line_iter = line_iter -> next;
-            }
-            if (b > rows || a > rows) {
-                printf("\nERROR %d: Sinirlar uygun aralikta degil", cmd_row);
-                continue;
-            }
-            print_by_rows(a, b);
-        }
-        else if (strcmp(command, "CURSOR") == 0) cursor();
-        else if (strcmp(command, "FIND") == 0) {
-            char *arg1 = strtok(NULL, " \"\n");
-            find(arg1);
-        }
-        else if (strcmp(command, "STATS") == 0) stats();
-        else if (strcmp(command, "EXIT") == 0) return;
-        else printf("\nERROR %d: Tanimsiz komut");
+        run_command(command_line, cmd_row);
         cmd_row++;
     }
+}
+
+void run_command(char *command_line, int cmd_row) {
+    char *command = strtok(command_line, " \n");
+    if (command == NULL || command[0] == '\n') return;
+    if (command == NULL) return;
+
+    if (strcmp(command, "MOVE") == 0) {
+        char *arg1 = strtok(NULL, " \n");
+        char *arg2 = strtok(NULL, " \n");
+
+        if (arg1 == NULL || arg2 == NULL) {
+            printf("\nERROR %d: Eksik bagimsiz degisken", cmd_row);
+            return;
+        }
+
+        int r = str_to_uint(arg1);
+        int c = str_to_uint(arg2);
+
+        if (r < 0 || c < 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+        move(r, c);
+    }
+    else if (strcmp(command, "LEFT") == 0) {
+        char *arg1 = strtok(NULL, " \n");
+
+        int n = str_to_uint(arg1);
+        if (n <= 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+        left(n);
+    }
+    else if (strcmp(command, "RIGHT") == 0) {
+        char *arg1 = strtok(NULL, " \n");
+        int n = str_to_uint(arg1);
+        if (n <= 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+        right(n);
+    }
+    else if (strcmp(command, "UP") == 0) {
+        char *arg1 = strtok(NULL, " \n");
+        int n = str_to_uint(arg1);
+        if (n <= 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+        up(n);
+    }
+    else if (strcmp(command, "DOWN") == 0) {
+        char *arg1 = strtok(NULL, " \n");
+        int n = str_to_uint(arg1);
+        if (n <= 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+        down(n);
+    }
+    else if (strcmp(command, "INSERT") == 0) {
+        char *arg1 = strtok(NULL, "\"\n");
+        insert(arg1);
+    }
+    else if (strcmp(command, "DELETE") == 0) {
+        char *arg1 = strtok(NULL, " \n");
+        int n = str_to_uint(arg1);
+        if (n <= 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+        del(n);
+    }
+    else if (strcmp(command, "BACKSPACE") == 0) {
+        char *arg1 = strtok(NULL, " \n");
+        int n = str_to_uint(arg1);
+        if (n <= 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+        backspace(n);
+    }
+    else if (strcmp(command, "NEWLINE") == 0)
+        newline();
+    else if (strcmp(command, "DELLINE") == 0) {
+        char *arg1 = strtok(NULL, " \n");
+        int r = str_to_uint(arg1);
+        if (r < 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+        int result = delline(r);
+
+        if (result == -1) {
+            printf("\nERROR %d: Gecersiz satir numarasi", cmd_row);
+            return;
+        }
+    }
+    else if (strcmp(command, "REPLACE") == 0) {
+        char *arg1 = strtok(NULL, " \"\n");
+        char *arg2 = strtok(NULL, " \"\n");
+        replace(arg1, arg2);
+    }
+    else if (strcmp(command, "PRINT") == 0) {
+        char *arg1 = strtok(NULL, " []\n");
+        char *arg2 = strtok(NULL, " []\n");
+        if (arg1 == NULL) {
+            print();
+            return;
+        }
+        int a = str_to_uint(arg1);
+        int b = str_to_uint(arg2);
+
+        if (a < 0 || b < 0) {
+            printf("\nERROR %d: Gecersiz sayi", cmd_row);
+            return;
+        }
+
+        int rows = 0;
+        LineNode *line_iter = line_root;
+        while (line_iter != NULL) {
+            rows++;
+            line_iter = line_iter -> next;
+        }
+        if (b > rows || a > rows) {
+            printf("\nERROR %d: Sinirlar uygun aralikta degil", cmd_row);
+            return;
+        }
+        print_by_rows(a, b);
+    }
+    else if (strcmp(command, "CURSOR") == 0) cursor();
+    else if (strcmp(command, "FIND") == 0) {
+        char *arg1 = strtok(NULL, " \"\n");
+        find(arg1);
+    }
+    else if (strcmp(command, "STATS") == 0) stats();
+    else if (strcmp(command, "EXIT") == 0) return;
+    else printf("\nERROR %d: Tanimsiz komut");
 }
 
 int str_to_uint(char *str) {
@@ -670,7 +660,15 @@ void init() {
 int main(void) {
     init();
     load_document("metin.txt");
-    run_commands("komutlar.txt");
+    run_as_cmd_file("komutlar.txt");
     save_document("metin2.txt");
-    return 0;
+
+    char command[50];
+
+    while (1) {
+        if (fgets(command, sizeof(command), stdin) == NULL) {
+            break;
+        }
+        run_command(command, -1);
+    }
 }
